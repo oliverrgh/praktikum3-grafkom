@@ -160,6 +160,24 @@ Tersedia tiga preset transform:
 | `2` | `(0.00, 0.00)` | `45°` | `(1.5, 1.5)` |
 | `3` | `(0.30, -0.20)` | `90°` | `(1.8, 0.6)` |
 
+### Challenge C — Toggle Transform Order
+
+Tombol `T` digunakan untuk mengganti transform order antara:
+
+```text
+T × R × S
+```
+
+dan:
+
+```text
+T × R
+```
+
+Pada mode `T × R × S`, scaling ikut dikomposisikan ke dalam Model Matrix. Pada mode `T × R`, scaling tidak dimasukkan ke dalam Model Matrix sehingga perubahan scale tidak terlihat pada Object A.
+
+Order yang sedang aktif ditampilkan secara real-time pada HUD bagian **Order**. Implementasi juga menyediakan tombol **Toggle order** pada UI.
+
 ### Challenge D — Mouse Translation
 
 Klik pada canvas digunakan untuk memindahkan Object A.
@@ -197,7 +215,7 @@ Aplikasi juga menampilkan lingkaran sebagai panduan orbit ketika mode ini aktif.
 
 ### Struktur File
 
-Pastikan file berikut berada dalam satu folder:
+Pastikan file berikut berada dalam satu folder/repository:
 
 ```text
 praktikum-transform-03/
@@ -208,31 +226,30 @@ praktikum-transform-03/
 └── README.md
 ```
 
-### Menggunakan Python HTTP Server
+### Akses melalui GitHub Pages
 
-Karena project menggunakan JavaScript module (`import { Mat3 } from "./matrix3.js"`), project sebaiknya dijalankan melalui HTTP server lokal.
+Project dapat dibuka langsung melalui browser menggunakan **GitHub Pages**, sehingga tidak perlu menjalankan Python HTTP Server secara lokal.
 
-1. Buka terminal pada direktori project:
-
-```bash
-cd praktikum-transform-03
-```
-
-2. Jalankan server:
-
-```bash
-python3 -m http.server 8000
-```
-
-3. Buka browser dan akses:
+Setelah repository di-upload ke GitHub dan GitHub Pages diaktifkan, gunakan format URL:
 
 ```text
-http://localhost:8000/praktikum3.html
+https://oliverrgh.github.io/praktikum3-grafkom/index.html
 ```
 
-4. Pastikan browser mendukung **WebGL2**.
+Langkah konfigurasi:
 
-Jika menggunakan VS Code, project juga dapat dijalankan menggunakan extension/local development server yang menyediakan HTTP server.
+1. Buat repository baru di GitHub.
+2. Upload `index.html`, `main.js`, `matrix3.js`, `style.css`, dan `README.md`.
+3. Pastikan nama file dan struktur folder sesuai.
+4. Buka **Settings → Pages** pada repository.
+5. Pada bagian **Build and deployment**, pilih **Deploy from a branch**.
+6. Pilih branch yang berisi project, biasanya `main`, dan folder `/ (root)`.
+7. Simpan konfigurasi dan tunggu proses deployment selesai.
+8. Buka URL GitHub Pages yang diberikan GitHub.
+
+> **Catatan:** Karena `main.js` menggunakan ES Module dengan `import { Mat3 } from "./matrix3.js"`, GitHub Pages cocok digunakan karena project dijalankan melalui HTTP/HTTPS, bukan melalui `file://`.
+
+Pastikan browser mendukung **WebGL2**.
 
 ## Catatan Debugging
 
@@ -312,6 +329,18 @@ Implementasi `Mat3` menyediakan operasi:
 - `multiply(a, b)`
 
 Komposisi transformasi pada `main.js` menggunakan perkalian matrix secara berurutan dan dibaca dari kanan ke kiri.
+
+## Refleksi
+
+Melalui project ini, konsep transformasi 2D menjadi lebih mudah dipahami karena perubahan posisi dan bentuk objek dapat diamati secara langsung melalui interaksi pada canvas. Implementasi `T × R × S` dan `T × R` menunjukkan bahwa urutan komposisi matrix memengaruhi bagaimana transformasi diterapkan pada objek.
+
+Penggunaan **Model Matrix** membantu memisahkan *local coordinate* objek dari posisi objek di *world space*. Konsep parent-child juga memperlihatkan bahwa transformasi lokal sebuah child dapat digabungkan dengan transformasi parent untuk menghasilkan *world transform*.
+
+Dari sisi implementasi, penggunaan `deltaTime` membuat pergerakan dan rotasi berbasis waktu sehingga tidak bergantung secara langsung pada jumlah frame. *State-based keyboard input* juga membuat tombol yang ditahan dapat menghasilkan gerakan kontinu, sedangkan aksi seperti reset dan toggle transform order tetap diproses sebagai aksi satu kali.
+
+Challenge mouse translation memberikan pemahaman tambahan mengenai konversi antara koordinat pixel pada layar, NDC, dan *world coordinate*. Sementara itu, pivot dan orbit membantu memperlihatkan bahwa titik pusat transformasi serta urutan matrix sangat berpengaruh terhadap hasil akhir.
+
+Secara keseluruhan, project ini menunjukkan bahwa transformasi grafika komputer bukan hanya sekadar mengubah nilai posisi, rotasi, atau skala, tetapi juga berkaitan dengan sistem koordinat, urutan operasi matrix, hierarchy, dan proses konversi koordinat.
 
 ## Ringkasan
 
