@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transformation Playground - Praktikum 3</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>Modul Praktikum</h2>
+    <nav class="nav-list" aria-label="Navigasi modul">
+      <a href="#" class="nav-item">Beranda Portal</a>
+      <a href="index.html" class="nav-item">WebGL Primitives</a>
+      <a href="praktikum3.html" class="nav-item active">Transformations</a>
+      <a href="#" class="nav-item locked">TBA</a>
+    </nav>
+    <div class="sidebar-note">
+      <span class="note-dot"></span>
+      <p>Eksperimen interaktif<br>WebGL 2.0</p>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+      <header>
+        <div class="dept-badge">Teknik Informatika / Week 03</div>
+        <h1>Transformation <span>Playground</span></h1>
+        <p>Model matrix, sistem koordinat, transform order, pivot, dan hierarki parent-child.</p>
+      </header>
+
+      <section class="team-container" aria-label="Informasi praktikum">
+        <article class="team-card">
+          <div class="avatar">MN</div>
+          <div class="team-info"><span class="name">Mario Napitupulu</span><span class="nim">5025241085</span></div>
+        </article>
+        <article class="team-card">
+          <div class="avatar">NY</div>
+          <div class="team-info"><span class="name">Nathanael Oliver A. Y.</span><span class="nim">5025241109</span></div>
+        </article>
+      </section>
+
+      <section class="controls-bar" aria-label="Kontrol playground">
+        <div class="control-group">
+          <div class="range-heading">
+            <label for="rotationSpeed">Rotation speed</label>
+            <output id="rotationSpeedValue">100°/s</output>
+          </div>
+          <input id="rotationSpeed" type="range" min="20" max="240" step="10" value="100" />
+        </div>
+        <div class="control-group">
+          <div class="range-heading">
+            <label for="scaleSpeed">Scale speed</label>
+            <output id="scaleSpeedValue">0.80</output>
+          </div>
+          <input id="scaleSpeed" type="range" min="0.20" max="2.00" step="0.10" value="0.80" />
+        </div>
+
+        <div class="control-group action-controls">
+          <label class="toggle-label"><input id="autoObjectB" type="checkbox" checked> Auto Object B</label>
+          <label class="toggle-label"><input id="showAxes" type="checkbox" checked> Coordinate axes</label>
+          <label class="toggle-label"><input id="showPivot" type="checkbox" checked> Pivot marker</label>
+          <label class="toggle-label"><input id="showParentChild" type="checkbox"> Parent-child</label>
+          <!-- Elemen tersembunyi agar referensi di main.js tidak error -->
+          <input id="mouseMode" type="checkbox" checked style="display: none;" />
+        </div>
+
+        <div class="control-group action-controls">
+          <button id="pauseButton" class="btn primary" type="button">Pause <kbd>P</kbd></button>
+          <button id="resetButton" class="btn" type="button">Reset <kbd>R</kbd></button>
+          <button id="orderButton" class="btn" type="button">Toggle order <kbd>T</kbd></button>
+          <button id="orbitButton" class="btn" type="button">Toggle orbit <kbd>O</kbd></button>
+          <button id="pivotButton" class="btn" type="button">Pivot demo <kbd>Y</kbd></button>
+        </div>
+      </section>
+
+      <section class="canvas-section">
+        <div class="canvas-heading">
+          <div><span class="section-kicker">LIVE RENDER</span><h2>WebGL Canvas</h2></div>
+          <span id="runStatus" class="status">LIVE</span>
+        </div>
+        <div class="canvas-wrapper">
+          <div class="canvas-frame">
+            <canvas id="glCanvas" width="1100" height="650"></canvas>
+            <div class="corner top-left">WORLD SPACE</div>
+            <div class="corner top-right">X / Y AXIS</div>
+            <div class="corner bottom-left">MODEL MATRIX : MAT3</div>
+            <div class="corner bottom-right">W = 1.0</div>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i class="dot blue"></i> Object A · interactive</span>
+          <span><i class="dot orange"></i> Object B · animated</span>
+          <span><i class="dot purple"></i> Object C · order test</span>
+          <span><i class="dot green"></i> Child · hierarchy</span>
+          <span><i class="dot yellow"></i> Pivot marker</span>
+        </div>
+      </section>
+
+      <section class="hud-grid" aria-label="Status render">
+        <div class="hud-card"><span>Position</span><strong id="positionInfo">(-0.35, 0.00)</strong></div>
+        <div class="hud-card"><span>Rotation</span><strong id="rotationInfo">0.0°</strong></div>
+        <div class="hud-card"><span>Scale</span><strong id="scaleInfo">(1.00, 1.00)</strong></div>
+        <div class="hud-card"><span>Order</span><strong id="orderInfo">T × R × S</strong></div>
+        <div class="hud-card"><span>Pivot</span><strong id="pivotInfo">Local origin (0,0)</strong></div>
+        <div class="hud-card"><span>Mode</span><strong id="modeInfo">Keyboard · Mouse click</strong></div>
+        <div class="hud-card"><span>FPS</span><strong id="fpsInfo">60 FPS</strong></div>
+        <div class="hud-card"><span>Frame</span><strong id="frameInfo">FRAME 0000</strong></div>
+      </section>
+
+      <section class="report-section">
+        <div class="section-header"><h4>Petunjuk Interaksi</h4><h2>Kontrol Playground</h2></div>
+        <div class="instructions-grid">
+          <p><kbd>W A S D</kbd> / <kbd>Arrow</kbd> menggerakkan Object A, <kbd>F</kbd> ganti kecepatan gerak.</p>
+          <p><kbd>Q</kbd> <kbd>E</kbd> rotasi berlawanan / searah jarum jam.</p>
+          <p><kbd>+</kbd> <kbd>−</kbd> uniform scale (X dan Y bersamaan).</p>
+          <p><kbd>Z</kbd> <kbd>X</kbd> scale sumbu X, <kbd>C</kbd> <kbd>V</kbd> scale sumbu Y.</p>
+          <p><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> preset transform.</p>
+          <p><kbd>T</kbd> ganti transform order, <kbd>O</kbd> toggle orbit.</p>
+          <p><kbd>Y</kbd> pivot demo, <kbd>H</kbd> parent-child.</p>
+          <p><kbd>P</kbd> / <kbd>Space</kbd> pause, <kbd>R</kbd> reset. Klik canvas untuk memindahkan Object A.</p>
+        </div>
+      </section>
+
+      <section class="report-section readme-section">
+        <div class="section-header"><h4>Engineering Readme</h4><h2>Cara Kerja Playground</h2></div>
+        <div class="readme-grid">
+          <div>
+            <h3 class="readme-title">Arsitektur Pemrosesan Input</h3>
+            <div class="arch-grid">
+              <article class="arch-card">
+                <h4>Event-Based Listener</h4>
+                <p>Sistem merespon sekali pada satu pemicu, misalnya tekan <kbd>R</kbd> untuk reset, <kbd>T</kbd> untuk ganti transform order, atau klik canvas untuk memindahkan Object A. Aksi sekali-tekan ini mengabaikan <i>event.repeat</i> supaya tidak terpicu berulang saat tombol ditahan.</p>
+              </article>
+              <article class="arch-card">
+                <h4>State-Based Polling</h4>
+                <p>Event <code>keydown</code> dan <code>keyup</code> hanya mengubah nilai <i>boolean</i> di tabel <code>keys</code>. Translasi, rotasi, dan scale dihitung di <code>update(dt)</code> setiap <i>frame</i> dikali <i>deltaTime</i>, menghasilkan gerakan kontinu yang konsisten di berbagai FPS.</p>
+              </article>
+            </div>
+            <p class="report-text">Sistem ini memisahkan data transform (posisi, rotasi, scale) dari proses render. Setiap frame, JavaScript menyusun <i>Model Matrix</i> mat3 lewat komposisi <code>T × R × S</code> atau <code>T × R</code>, mengirimnya sebagai <i>uniform</i> ke vertex shader, lalu geometry segitiga yang sama digambar ulang untuk Object A, B, C, dan child. Challenge A–F (reset, preset, toggle order, mouse translation, parent-child, orbit) dibangun di atas pipeline yang sama.</p>
+          </div>
+          <div class="checklist">
+            <div class="checklist-header"><h3 class="readme-title">Checklist Tugas</h3><span class="checklist-score">PASS</span></div>
+            <p><span class="check-icon">&#10003;</span> Matrix <i>uniform</i> ke vertex shader</p>
+            <p><span class="check-icon">&#10003;</span> <i>State-based</i> keyboard control</p>
+            <p><span class="check-icon">&#10003;</span> <i>Delta-time</i> movement</p>
+            <p><span class="check-icon">&#10003;</span> Automatic animation (Object B, child, orbit)</p>
+            <p><span class="check-icon">&#10003;</span> Transform order comparison (T×R×S vs T×R)</p>
+            <p><span class="check-icon">&#10003;</span> Pivot observation (marker &amp; door hinge)</p>
+            <p><span class="check-icon">&#10003;</span> Multiple object dengan geometry yang sama</p>
+            <p><span class="check-icon">&#10003;</span> HUD transform (pos, rot, scale, order)</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
