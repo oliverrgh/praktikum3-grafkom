@@ -1,26 +1,7 @@
 import { Mat3 } from "./matrix3.js";
 
-/* =========================================================================
- * INTERACTIVE TRANSFORMATION PLAYGROUND — WebGL2
- *
- * Alur koordinat:
- *   Local (vertex mentah)  →  Model Matrix  →  World  →  View (aspect)  →  NDC
- *
- * Struktur file:
- *   1. WebGL2 context & konstanta
- *   2. Shader (homogeneous coordinate + uniform matrix)
- *   3. Geometry (disimpan sekali di GPU buffer, dipakai ulang)
- *   4. State (object, mode, input)
- *   5. Matrix builder (TRS, transform order, pivot, hierarchy, orbit)
- *   6. Update (deltaTime, keyboard, animasi)
- *   7. Draw
- *   8. HUD & sinkronisasi UI
- *   9. Event handler (keyboard, mouse, tombol)
- *  10. Main loop
- * ========================================================================= */
 
 /* ---------- 1. WebGL2 context & konstanta ---------- */
-
 const canvas = document.getElementById("glCanvas");
 const gl = canvas.getContext("webgl2", { antialias: true });
 
@@ -28,9 +9,6 @@ if (!gl) {
   throw new Error("WebGL2 tidak tersedia.");
 }
 
-// Canvas tidak persegi (1100x650). Tanpa koreksi, rotasi terlihat "gepeng/miring"
-// karena 1 unit NDC di sumbu X lebih panjang dari 1 unit NDC di sumbu Y.
-// Solusi: View matrix = Scale(1/aspect, 1) → world space X: [-aspect, +aspect], Y: [-1, +1].
 const ASPECT = canvas.width / canvas.height;
 const viewMatrix = Mat3.scaling(1 / ASPECT, 1);
 
